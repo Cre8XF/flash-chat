@@ -19,4 +19,5 @@ export const db       = getFirestore(app);
 export const storage  = getStorage(app);
 
 // Messaging is only available in browsers that support service workers + push
-export const messaging = await isSupported().then(ok => ok ? getMessaging(app) : null);
+export let messaging = null;
+isSupported().then(ok => { if (ok) messaging = getMessaging(app); });
