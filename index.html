@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flash — Privat Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --surface2: #1c1c26;
+      --border: #2a2a3a;
+      --accent: #ff4d6d;
+      --accent2: #ff8fab;
+      --text: #f0f0f5;
+      --muted: #7070a0;
+      --sent: #ff4d6d;
+      --received: #1c1c26;
+      --online: #4ade80;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* ---- AUTH SCREEN ---- */
+    #auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100dvh;
+      padding: 2rem;
+      background: radial-gradient(ellipse at 50% 0%, #3d0020 0%, #0a0a0f 60%);
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 3rem;
+      letter-spacing: -2px;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus { border-color: var(--accent); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: #ff2d52; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .auth-error {
+      color: #ff6b6b;
+      font-size: 0.82rem;
+      margin-top: 0.75rem;
+      text-align: center;
+    }
+
+    /* ---- MAIN APP ---- */
+    #app {
+      display: none;
+      flex-direction: column;
+      height: 100dvh;
+    }
+
+    /* ---- CONTACTS VIEW ---- */
+    #contacts-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .top-bar .logo { font-size: 1.6rem; margin: 0; }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #c9184a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .search-wrap {
+      padding: 0.75rem 1.25rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.6rem 1rem 0.6rem 2.5rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237070a0' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 0.75rem center;
+    }
+
+    .contacts-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 0;
+    }
+
+    .contact-item:hover { background: var(--surface2); }
+    .contact-item.active { background: var(--surface2); }
+
+    .contact-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7b2d8b, #c9184a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .online-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--online);
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+    }
+
+    .contact-info { flex: 1; min-width: 0; }
+
+    .contact-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .contact-preview {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .contact-meta {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .contact-time {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .unread-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 6px;
+      margin-top: 3px;
+    }
+
+    .empty-contacts {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--muted);
+    }
+
+    .empty-contacts .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-contacts p { font-size: 0.85rem; line-height: 1.6; }
+
+    .add-contact-btn {
+      margin: 1rem 1.25rem;
+      padding: 0.75rem;
+      background: transparent;
+      border: 1.5px dashed var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      width: calc(100% - 2.5rem);
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .add-contact-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---- CHAT VIEW ---- */
+    #chat-view {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.85rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-radius: 8px;
+    }
+
+    .chat-header-info { flex: 1; }
+
+    .chat-header-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .chat-header-status {
+      font-size: 0.72rem;
+      color: var(--online);
+    }
+
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .message-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+      animation: msgIn 0.25s ease-out;
+    }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.sent { flex-direction: row-reverse; }
+
+    .msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7b2d8b, #c9184a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .message-row.sent .msg-avatar {
+      background: linear-gradient(135deg, var(--accent), #c9184a);
+    }
+
+    .message-bubble {
+      max-width: 70%;
+      padding: 0.65rem 1rem;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .message-row.received .message-bubble {
+      background: var(--received);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+      color: var(--text);
+    }
+
+    .message-row.sent .message-bubble {
+      background: var(--sent);
+      border-bottom-right-radius: 4px;
+      color: white;
+    }
+
+    .message-bubble img {
+      max-width: 100%;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .message-bubble video {
+      max-width: 100%;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .msg-time {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    .message-row.received .msg-time { text-align: left; }
+
+    /* ---- INPUT BAR ---- */
+    .input-bar {
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .media-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .media-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .msg-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.6rem 1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      resize: none;
+      max-height: 100px;
+      line-height: 1.4;
+    }
+
+    .msg-input:focus { border-color: var(--accent); }
+
+    .send-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover { background: #ff2d52; transform: scale(1.05); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ---- MODAL ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 480px;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .modal-close {
+      float: right;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-top: -2px;
+    }
+
+    /* ---- MEDIA PREVIEW ---- */
+    .media-preview {
+      display: none;
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .media-preview.show { display: flex; }
+
+    .preview-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .preview-remove {
+      background: var(--accent);
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ---- CONFIG BANNER ---- */
+    .config-banner {
+      background: #1a1a00;
+      border: 1px solid #5a5a00;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem;
+      font-size: 0.8rem;
+      color: #d4d400;
+      line-height: 1.6;
+    }
+
+    .config-banner strong { color: #ffff44; }
+
+    /* ---- SCROLLBAR ---- */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (min-width: 600px) {
+      #chat-view { position: relative; }
+      #app { flex-direction: row; }
+      #contacts-view { width: 320px; border-right: 1px solid var(--border); }
+      #chat-view { flex: 1; display: flex !important; }
+      .back-btn { display: none; }
+      .empty-chat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        color: var(--muted);
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="logo">Flash ⚡</div>
+  <div class="tagline">Privat. Direkte. Kun dere to.</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Logg inn</button>
+      <button class="auth-tab" onclick="switchTab('register')">Registrer</button>
+    </div>
+    <div id="login-form">
+      <div class="field"><label>E-post</label><input type="email" id="login-email" placeholder="deg@eksempel.no" /></div>
+      <div class="field"><label>Passord</label><input type="password" id="login-pass" placeholder="••••••••" /></div>
+      <button class="btn-primary" onclick="doLogin()">Logg inn</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="field"><label>Visningsnavn</label><input type="text" id="reg-name" placeholder="Ditt navn" /></div>
+      <div class="field"><label>E-post</label><input type="email" id="reg-email" placeholder="deg@eksempel.no" /></div>
+      <div class="field"><label>Passord</label><input type="password" id="reg-pass" placeholder="Min. 6 tegn" /></div>
+      <button class="btn-primary" onclick="doRegister()">Opprett konto</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- CONTACTS -->
+  <div id="contacts-view">
+    <div class="top-bar">
+      <div class="logo">Flash ⚡</div>
+      <div class="user-avatar" id="my-avatar" onclick="showLogout()">?</div>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Søk i samtaler..." id="search-input" oninput="filterContacts()" />
+    </div>
+    <div class="contacts-list" id="contacts-list">
+      <div class="empty-contacts">
+        <div class="icon">💬</div>
+        <p>Ingen samtaler ennå.<br/>Legg til en venn for å starte.</p>
+      </div>
+    </div>
+    <button class="add-contact-btn" onclick="openAddContact()">+ Legg til person via e-post</button>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat-view">
+    <div class="chat-header">
+      <button class="back-btn" onclick="closeChat()">←</button>
+      <div class="contact-avatar" id="chat-avatar" style="width:36px;height:36px;font-size:0.85rem;">?</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name" id="chat-name">—</div>
+        <div class="chat-header-status" id="chat-status">● Online</div>
+      </div>
+    </div>
+    <div class="messages-container" id="messages-container">
+      <!-- messages here -->
+    </div>
+    <div class="media-preview" id="media-preview">
+      <img class="preview-thumb" id="preview-thumb" src="" alt="" />
+      <span id="preview-label" style="font-size:0.8rem;color:var(--muted);flex:1">Bilde klar</span>
+      <button class="preview-remove" onclick="clearMedia()">✕</button>
+    </div>
+    <div class="input-bar">
+      <button class="media-btn" onclick="document.getElementById('file-input').click()" title="Send bilde/video">📎</button>
+      <input type="file" id="file-input" accept="image/*,video/*" style="display:none" onchange="handleFile(event)" />
+      <textarea class="msg-input" id="msg-input" placeholder="Skriv en melding..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CONTACT MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
+    <h3>Legg til person</h3>
+    <div class="field">
+      <label>E-postadresse</label>
+      <input type="email" id="add-email" placeholder="venn@eksempel.no" />
+    </div>
+    <button class="btn-primary" onclick="addContact()">Start samtale</button>
+    <div id="add-error" class="auth-error"></div>
+  </div>
+</div>
+
+<!-- LOGOUT MODAL -->
+<div class="modal-overlay" id="logout-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('logout-modal')">✕</button>
+    <h3>Konto</h3>
+    <p id="logout-info" style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem;"></p>
+    <button class="btn-primary" onclick="doLogout()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);">Logg ut</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, addDoc, orderBy, serverTimestamp, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  // ============================================================
+  // 🔧 KONFIGURASJON — fyll inn dine Firebase-verdier her
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "DIN_API_KEY",
+    authDomain: "DIN_APP.firebaseapp.com",
+    projectId: "DIN_PROJECT_ID",
+    storageBucket: "DIN_APP.appspot.com",
+    messagingSenderId: "DIN_SENDER_ID",
+    appId: "DIN_APP_ID"
+  };
+  // ============================================================
+
+  const CONFIGURED = !firebaseConfig.apiKey.startsWith("DIN_");
+
+  const app = CONFIGURED ? initializeApp(firebaseConfig) : null;
+  const auth = CONFIGURED ? getAuth(app) : null;
+  const db = CONFIGURED ? getFirestore(app) : null;
+  const storage = CONFIGURED ? getStorage(app) : null;
+
+  // --- State ---
+  let currentUser = null;
+  let currentChatId = null;
+  let currentPartner = null;
+  let messagesUnsub = null;
+  let contactsUnsub = null;
+  let pendingFile = null;
+
+  // --- Show config warning if not set up ---
+  if (!CONFIGURED) {
+    document.getElementById('auth-screen').innerHTML = `
+      <div style="max-width:420px;padding:2rem">
+        <div class="logo">Flash ⚡</div>
+        <div class="tagline">Privat Chat App</div>
+        <div class="config-banner" style="margin-top:2rem">
+          <strong>🔧 Firebase-konfigurasjon mangler</strong><br/><br/>
+          For å bruke appen må du:<br/>
+          1. Opprett et prosjekt på <strong>console.firebase.google.com</strong><br/>
+          2. Aktiver <strong>Authentication</strong> (Email/Password)<br/>
+          3. Aktiver <strong>Firestore Database</strong><br/>
+          4. Aktiver <strong>Storage</strong><br/>
+          5. Kopier konfig-verdiene inn i <code>firebaseConfig</code> i index.html<br/><br/>
+          Se README.md for full veiledning.
+        </div>
+      </div>`;
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+
+  // --- Auth state ---
+  if (CONFIGURED) {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        const initial = (user.displayName || user.email).charAt(0).toUpperCase();
+        document.getElementById('my-avatar').textContent = initial;
+        document.getElementById('logout-info').textContent = user.email;
+        loadContacts();
+      } else {
+        currentUser = null;
+        document.getElementById('auth-screen').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+        if (contactsUnsub) contactsUnsub();
+        if (messagesUnsub) messagesUnsub();
+      }
+    });
+  }
+
+  // --- Auth functions ---
+  window.switchTab = (tab) => {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0) === (tab==='login')));
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('auth-error').textContent = '';
+  };
+
+  window.doLogin = async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+      document.getElementById('auth-error').textContent = 'Feil e-post eller passord.';
+    }
+  };
+
+  window.doRegister = async () => {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value;
+    if (!name) { document.getElementById('auth-error').textContent = 'Skriv inn navn.'; return; }
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name });
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        uid: cred.user.uid,
+        email: email.toLowerCase(),
+        displayName: name,
+        createdAt: serverTimestamp()
+      });
+    } catch(e) {
+      document.getElementById('auth-error').textContent = e.code === 'auth/email-already-in-use' ? 'E-post er allerede i bruk.' : 'Registrering feilet.';
+    }
+  };
+
+  window.doLogout = async () => {
+    await signOut(auth);
+    closeModal('logout-modal');
+  };
+
+  window.showLogout = () => document.getElementById('logout-modal').classList.add('open');
+
+  // --- Contacts ---
+  function loadContacts() {
+    const q = query(collection(db, 'chats'), where('participants', 'array-contains', currentUser.uid));
+    contactsUnsub = onSnapshot(q, async (snap) => {
+      const contacts = [];
+      for (const d of snap.docs) {
+        const data = d.data();
+        const partnerId = data.participants.find(id => id !== currentUser.uid);
+        if (!partnerId) continue;
+        const partnerDoc = await getDoc(doc(db, 'users', partnerId));
+        if (!partnerDoc.exists()) continue;
+        contacts.push({
+          chatId: d.id,
+          partner: partnerDoc.data(),
+          lastMessage: data.lastMessage || '',
+          lastTime: data.lastTime,
+          unread: data.unread?.[currentUser.uid] || 0
+        });
+      }
+      contacts.sort((a,b) => (b.lastTime?.toMillis?.() || 0) - (a.lastTime?.toMillis?.() || 0));
+      renderContacts(contacts);
+    });
+  }
+
+  function renderContacts(contacts) {
+    const list = document.getElementById('contacts-list');
+    if (contacts.length === 0) {
+      list.innerHTML = `<div class="empty-contacts"><div class="icon">💬</div><p>Ingen samtaler ennå.<br/>Legg til en venn for å starte.</p></div>`;
+      return;
+    }
+    list.innerHTML = contacts.map(c => {
+      const initial = (c.partner.displayName || c.partner.email).charAt(0).toUpperCase();
+      const time = c.lastTime ? formatTime(c.lastTime.toDate()) : '';
+      return `<div class="contact-item ${currentChatId === c.chatId ? 'active' : ''}" onclick="openChat('${c.chatId}','${c.partner.uid}')">
+        <div class="contact-avatar" style="background:${avatarGradient(c.partner.uid)}">${initial}<div class="online-dot"></div></div>
+        <div class="contact-info">
+          <div class="contact-name">${c.partner.displayName || c.partner.email}</div>
+          <div class="contact-preview">${c.lastMessage}</div>
+        </div>
+        <div class="contact-meta">
+          <div class="contact-time">${time}</div>
+          ${c.unread > 0 ? `<div class="unread-badge">${c.unread}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.filterContacts = () => { /* live search via DOM */ };
+
+  // --- Add contact ---
+  window.openAddContact = () => {
+    document.getElementById('add-email').value = '';
+    document.getElementById('add-error').textContent = '';
+    document.getElementById('add-modal').classList.add('open');
+  };
+
+  window.addContact = async () => {
+    const email = document.getElementById('add-email').value.trim().toLowerCase();
+    if (!email) return;
+    if (email === currentUser.email.toLowerCase()) {
+      document.getElementById('add-error').textContent = 'Det er deg selv!'; return;
+    }
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      document.getElementById('add-error').textContent = 'Finner ingen bruker med den e-posten.'; return;
+    }
+    const partner = snap.docs[0].data();
+    const ids = [currentUser.uid, partner.uid].sort();
+    const chatId = ids.join('_');
+    await setDoc(doc(db, 'chats', chatId), {
+      participants: ids,
+      lastMessage: '',
+      lastTime: serverTimestamp()
+    }, { merge: true });
+    closeModal('add-modal');
+    openChat(chatId, partner.uid);
+  };
+
+  // --- Chat ---
+  window.openChat = async (chatId, partnerId) => {
+    currentChatId = chatId;
+    const partnerDoc = await getDoc(doc(db, 'users', partnerId));
+    currentPartner = partnerDoc.data();
+
+    document.getElementById('chat-name').textContent = currentPartner.displayName || currentPartner.email;
+    const initial = (currentPartner.displayName || currentPartner.email).charAt(0).toUpperCase();
+    document.getElementById('chat-avatar').textContent = initial;
+    document.getElementById('chat-avatar').style.background = avatarGradient(partnerId);
+
+    document.getElementById('chat-view').style.display = 'flex';
+
+    if (messagesUnsub) messagesUnsub();
+    const msgQ = query(collection(db, 'chats', chatId, 'messages'), orderBy('createdAt'));
+    messagesUnsub = onSnapshot(msgQ, (snap) => {
+      renderMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    // Mark as read
+    await updateDoc(doc(db, 'chats', chatId), { [`unread.${currentUser.uid}`]: 0 });
+  };
+
+  window.closeChat = () => {
+    document.getElementById('chat-view').style.display = 'none';
+    currentChatId = null;
+    if (messagesUnsub) { messagesUnsub(); messagesUnsub = null; }
+  };
+
+  function renderMessages(messages) {
+    const container = document.getElementById('messages-container');
+    const myInitial = (currentUser.displayName || currentUser.email).charAt(0).toUpperCase();
+    const partnerInitial = (currentPartner.displayName || currentPartner.email).charAt(0).toUpperCase();
+
+    container.innerHTML = messages.map(m => {
+      const isSent = m.senderId === currentUser.uid;
+      const time = m.createdAt ? formatTime(m.createdAt.toDate()) : '';
+      const initial = isSent ? myInitial : partnerInitial;
+      let content = '';
+      if (m.type === 'image') {
+        content = `<img src="${m.mediaUrl}" alt="bilde" loading="lazy" />`;
+      } else if (m.type === 'video') {
+        content = `<video src="${m.mediaUrl}" controls playsinline></video>`;
+      } else {
+        content = escapeHtml(m.text || '');
+      }
+      return `<div class="message-row ${isSent ? 'sent' : 'received'}">
+        <div class="msg-avatar">${initial}</div>
+        <div>
+          <div class="message-bubble">${content}</div>
+          <div class="msg-time">${time}</div>
+        </div>
+      </div>`;
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  window.sendMessage = async () => {
+    if (!currentChatId) return;
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if (!text && !pendingFile) return;
+
+    const btn = document.getElementById('send-btn');
+    btn.disabled = true;
+    input.value = '';
+    autoResize(input);
+
+    try {
+      let msgData = {
+        senderId: currentUser.uid,
+        createdAt: serverTimestamp(),
+        type: 'text',
+        text: text
+      };
+
+      if (pendingFile) {
+        const isVideo = pendingFile.type.startsWith('video');
+        const path = `chats/${currentChatId}/${Date.now()}_${pendingFile.name}`;
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, pendingFile);
+        const url = await getDownloadURL(storageRef);
+        msgData = { ...msgData, type: isVideo ? 'video' : 'image', mediaUrl: url, text: '' };
+        clearMedia();
+      }
+
+      await addDoc(collection(db, 'chats', currentChatId, 'messages'), msgData);
+
+      // Update chat preview
+      const partnerId = currentPartner.uid;
+      await updateDoc(doc(db, 'chats', currentChatId), {
+        lastMessage: msgData.type === 'text' ? text : (msgData.type === 'image' ? '📷 Bilde' : '🎬 Video'),
+        lastTime: serverTimestamp(),
+        [`unread.${partnerId}`]: (await getDoc(doc(db, 'chats', currentChatId))).data()?.unread?.[partnerId] + 1 || 1
+      });
+    } catch(e) {
+      console.error(e);
+    }
+    btn.disabled = false;
+  };
+
+  window.handleKey = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  // --- File handling ---
+  window.handleFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    pendingFile = file;
+    const preview = document.getElementById('media-preview');
+    const thumb = document.getElementById('preview-thumb');
+    const label = document.getElementById('preview-label');
+    preview.classList.add('show');
+    if (file.type.startsWith('image')) {
+      thumb.src = URL.createObjectURL(file);
+      label.textContent = file.name;
+    } else {
+      thumb.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><text y="36" font-size="36">🎬</text></svg>';
+      label.textContent = file.name;
+    }
+    e.target.value = '';
+  };
+
+  window.clearMedia = () => {
+    pendingFile = null;
+    document.getElementById('media-preview').classList.remove('show');
+    document.getElementById('preview-thumb').src = '';
+  };
+
+  // --- Modal helpers ---
+  window.openModal = (id) => document.getElementById(id).classList.add('open');
+  window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('open'); });
+  });
+
+  // --- Helpers ---
+  window.autoResize = (el) => {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  };
+
+  function formatTime(date) {
+    const now = new Date();
+    const diff = now - date;
+    if (diff < 60000) return 'nå';
+    if (diff < 3600000) return Math.floor(diff/60000) + ' min';
+    if (diff < 86400000) return date.toLocaleTimeString('no', { hour:'2-digit', minute:'2-digit' });
+    return date.toLocaleDateString('no', { day:'numeric', month:'short' });
+  }
+
+  function avatarGradient(uid) {
+    const colors = [
+      'linear-gradient(135deg,#7b2d8b,#c9184a)',
+      'linear-gradient(135deg,#1a7a6e,#0ea5e9)',
+      'linear-gradient(135deg,#7c3aed,#db2777)',
+      'linear-gradient(135deg,#b45309,#d97706)',
+      'linear-gradient(135deg,#065f46,#059669)',
+    ];
+    const i = uid.charCodeAt(0) % colors.length;
+    return colors[i];
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>');
+  }
+</script>
+</body>
+</html>
