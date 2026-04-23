@@ -57,6 +57,7 @@ export async function doRegister() {
       createdAt: serverTimestamp(),
     });
   } catch (e) {
+    console.log(e);
     document.getElementById('auth-error').textContent =
       e.code === 'auth/email-already-in-use' ? 'E-post er allerede i bruk.' : 'Registrering feilet.';
   }
