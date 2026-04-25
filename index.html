@@ -64,6 +64,13 @@
       </div>
     </div>
     <div class="messages-container" id="messages-container"></div>
+    <div class="reply-bar" id="reply-bar" style="display:none">
+      <div class="reply-bar-content">
+        <span class="reply-bar-name" id="reply-sender"></span>
+        <span class="reply-bar-text" id="reply-text"></span>
+      </div>
+      <button class="reply-bar-close" onclick="cancelReply()">✕</button>
+    </div>
     <div class="media-preview" id="media-preview">
       <img class="preview-thumb" id="preview-thumb" src="" alt="" />
       <span id="preview-label" style="font-size:0.8rem;color:var(--muted);flex:1">Bilde klar</span>
