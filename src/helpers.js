@@ -33,3 +33,39 @@ export function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/\n/g, '<br/>');
 }
+
+// Detect URLs in text and return first URL found
+export function extractUrl(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const match = text.match(urlRegex);
+  return match ? match[0] : null;
+}
+
+// Linkify text — wrap URLs in <a> tags
+export function linkify(str) {
+  const escaped = str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br/>');
+  return escaped.replace(
+    /(https?:\/\/[^\s&]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer" class="msg-link">$1</a>'
+  );
+}
+
+// Detect YouTube video ID
+export function getYouTubeId(url) {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+// Detect platform type from URL
+export function getLinkType(url) {
+  if (!url) return null;
+  if (/youtu(be\.com|\.be)/i.test(url)) return 'youtube';
+  if (/instagram\.com/i.test(url)) return 'instagram';
+  if (/tiktok\.com/i.test(url)) return 'tiktok';
+  if (/twitter\.com|x\.com/i.test(url)) return 'twitter';
+  return 'generic';
+}
