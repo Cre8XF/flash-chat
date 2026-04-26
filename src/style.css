@@ -826,3 +826,185 @@ body {
   opacity: 0.85;
   word-break: break-all;
 }
+
+/* ── CAMERA OVERLAY ──────────────────────────────────────────── */
+.camera-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 900;
+  overflow: hidden;
+}
+
+.camera-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-close {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.camera-close:hover { background: rgba(255,255,255,0.2); }
+
+.flip-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: white;
+  font-size: 1.3rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.flip-btn:hover { background: rgba(255,255,255,0.2); }
+
+.recording-indicator {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(0,0,0,0.6);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+  z-index: 10;
+}
+
+.recording-indicator.active { display: flex; }
+
+.rec-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff4d6d;
+  animation: blink-rec 1s ease-in-out infinite;
+}
+
+@keyframes blink-rec {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+.rec-time {
+  color: white;
+  font-size: 0.82rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.camera-controls {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.capture-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: white;
+  border: 4px solid rgba(255,255,255,0.5);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.25);
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s;
+}
+
+.capture-btn:active { transform: scale(0.9); }
+
+.capture-btn.recording {
+  background: #ff4d6d;
+  border-color: rgba(255,77,109,0.5);
+  animation: pulse-rec 1s ease-in-out infinite;
+}
+
+@keyframes pulse-rec {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(255,77,109,0.7); }
+  50%       { box-shadow: 0 0 0 14px rgba(255,77,109,0); }
+}
+
+/* ── CAMERA RESULT ───────────────────────────────────────────── */
+.camera-result {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.result-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.result-actions {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  z-index: 10;
+}
+
+.result-btn {
+  padding: 0.7rem 2rem;
+  border-radius: 30px;
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.result-discard {
+  background: rgba(255,255,255,0.18);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.45);
+}
+
+.result-discard:hover { background: rgba(255,255,255,0.32); }
+
+.result-send {
+  background: var(--accent);
+  color: white;
+}
+
+.result-send:hover { background: #ff2d52; }

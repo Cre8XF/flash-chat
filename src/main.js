@@ -2,6 +2,7 @@ import './style.css';
 import { initAuth, doLogin, doRegister, doLogout } from './auth.js';
 import { addContact } from './contacts.js';
 import { sendMessage, closeChat, handleFile, clearMedia } from './chat.js';
+import { openCamera } from './camera.js';
 
 // ── Global state ──────────────────────────────────────────────
 window.currentUser  = null;
@@ -17,6 +18,7 @@ window.sendMessage   = sendMessage;
 window.closeChat     = closeChat;
 window.handleFile    = handleFile;
 window.clearMedia    = clearMedia;
+window.openCamera    = openCamera;
 
 window.switchTab = (tab) => {
   document.querySelectorAll('.auth-tab').forEach((t, i) =>

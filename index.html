@@ -86,6 +86,7 @@
     <div class="input-bar">
       <button class="media-btn" onclick="document.getElementById('file-input').click()" title="Send bilde/video">📎</button>
       <input type="file" id="file-input" accept="image/*,video/*" style="display:none" onchange="handleFile(event)" />
+      <button class="media-btn" onclick="openCamera()" title="Ta bilde/video">📷</button>
       <textarea class="msg-input" id="msg-input" placeholder="Skriv en melding..." rows="1"
         onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
       <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
